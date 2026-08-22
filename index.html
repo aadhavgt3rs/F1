@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 2026 Championship Dashboard</title>
+    <style>
+        :root {
+            --f1-red: #e10600;
+            --f1-dark: #0f0f14;
+            --card-bg: rgba(25, 25, 35, 0.9);
+            --border-color: rgba(255, 255, 255, 0.12);
+            --text-main: #f3f3f3;
+            --text-muted: #9e9ea3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--f1-dark);
+            color: var(--text-main);
+            padding: 20px;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(225, 6, 0, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(225, 6, 0, 0.08) 0%, transparent 40%);
+        }
+
+        header {
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        header h1 span {
+            color: var(--f1-red);
+            text-shadow: 0 0 15px rgba(225, 6, 0, 0.5);
+        }
+
+        .controls {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--text-main);
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--f1-red);
+            box-shadow: 0 0 10px rgba(225, 6, 0, 0.3);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--f1-red);
+            border-color: var(--f1-red);
+            box-shadow: 0 0 12px rgba(225, 6, 0, 0.4);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .card h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: var(--f1-red);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            padding: 0 12px 10px 12px;
+            text-align: left;
+        }
+
+        tbody tr {
+            background: rgba(255, 255, 255, 0.03);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        td {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        td:first-child { border-radius: 6px 0 0 6px; }
+        td:last-child { border-radius: 0 6px 6px 0; }
+
+        .driver-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .driver-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #2a2a3a;
+            border: 1px solid var(--f1-red);
+        }
+
+        .team-tag {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .pos {
+            font-weight: 800;
+            color: var(--f1-red);
+            width: 30px;
+        }
+
+        .web-link {
+            color: var(--f1-red);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .web-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status-upcoming {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>2026 <span>F1 Grid & Races</span></h1>
+    </header>
+
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search drivers, teams, circuits or status...">
+        </div>
+        <div class="btn-group">
+            <button class="tab-btn active" onclick="switchView('all', event)">Show All</button>
+            <button class="tab-btn" onclick="switchView('standings', event)">22 Drivers</button>
+            <button class="tab-btn" onclick="switchView('schedule', event)">24 Races</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- All 22 Driver Standings Card -->
+        <div class="card" id="standingsCard">
+            <h2>2026 Driver Standings & Grid (22)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Driver & Team</th>
+                        <th>Pts</th>
+                        <th>Official Site</th>
+                    </tr>
+                </thead>
+                <tbody id="standingsTable">
+                    <!-- Populated via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- All 24 Race Calendar Card -->
+        <div class="card" id="scheduleCard">
+            <h2>2026 Race Calendar (24)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rnd</th>
+                        <th>Grand Prix</th>
+                        <th>Winner / Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTable">
+                    <!-- Populated via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Full dataset for 22 Drivers (2026 Season Grid)
+        const standingsData = [
+            { pos: 1, name: "Andrea Kimi Antonelli", code: "ANT", team: "Mercedes", points: 219, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/K/KIMANT01_Kimi_Antonelli/kimant01.png", website: "https://www.mercedesamgf1.com" },
+            { pos: 2, name: "Lewis Hamilton", code: "HAM", team: "Ferrari", points: 169, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png", website: "https://www.lewishamilton.com" },
+            { pos: 3, name: "George Russell", code: "RUS", team: "Mercedes", points: 160, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png", website: "https://www.georgerussell63.com" },
+            { pos: 4, name: "Charles Leclerc", code: "LEC", team: "Ferrari", points: 138, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png", website: "https://www.charlesleclerc.com" },
+            { pos: 5, name: "Lando Norris", code: "NOR", team: "McLaren", points: 128, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png", website: "https://landonorris.com" },
+            { pos: 6, name: "Max Verstappen", code: "VER", team: "Red Bull Racing", points: 109, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png", website: "https://www.verstappen.com" },
+            { pos: 7, name: "Isack Hadjar", code: "HAD", team: "Red Bull Racing", points: 96, img: "https://media.formula1.com/d_driver_fallback_image.png", website: "https://www.redbullracing.com" },
+            { pos: 8, name: "Oscar Piastri", code: "PIA", team: "McLaren", points: 92, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png", website: "https://oscarpiastri.com" },
+            { pos: 9, name: "Pierre Gasly", code: "GAS", team: "Alpine", points: 48, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/P/PIEGAS01_Pierre_Gasly/piegas01.png", website: "https://www.pierregasly.com" },
+            { pos: 10, name: "Liam Lawson", code: "LAW", team: "Racing Bulls", points: 34, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LIALAW01_Liam_Lawson/lialaw01.png", website: "https://www.visacashapprb.com" },
+            { pos: 11, name: "Arvid Lindblad", code: "LIN", team: "Racing Bulls", points: 21, img: "https://media.formula1.com/d_driver_fallback_image.png", website: "https://www.visacashapprb.com" },
+            { pos: 12, name: "Oliver Bearman", code: "BEA", team: "Haas F1", points: 18, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OLIBEA01_Oliver_Bearman/olibea01.png", website: "https://www.haasf1team.com" },
+            { pos: 13, name: "Franco Colapinto", code: "COL", team: "Alpine", points: 19, img: "https://media.formula1.com/d_driver_fallback_image.png", website: "https://www.alpinecars.com" },
+            { pos: 14, name: "Gabriel Bortoleto", code: "BOR", team: "Audi F1", points: 6, img: "https://media.formula1.com/d_driver_fallback_image.png", website: "https://www.audi.com" },
+            { pos: 15, name: "Nico Hülkenberg", code: "HUL", team: "Audi F1", points: 2, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/N/NICHUL01_Nico_Hulkenberg/nichul01.png", website: "https://nicohulkenberg.net" },
+            { pos: 16, name: "Esteban Ocon", code: "OCO", team: "Haas F1", points: 3, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/E/ESTOCO01_Esteban_Ocon/estoco01.png", website: "https://www.esteban-ocon.com" },
+            { pos: 17, name: "Alex Albon", code: "ALB", team: "Williams", points: 5, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/A/ALEALB01_Alexander_Albon/alealb01.png", website: "https://alexalbon.com" },
+            { pos: 18, name: "Carlos Sainz Jr.", code: "SAI", team: "Williams", points: 4, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png", website: "https://www.carlossainz.es" },
+            { pos: 19, name: "Fernando Alonso", code: "ALO", team: "Aston Martin", points: 1, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png", website: "https://www.fernandoalonso.com" },
+            { pos: 20, name: "Sergio Pérez", code: "PER", team: "Cadillac F1", points: 0, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png", website: "https://sergioperez.mx" },
+            { pos: 21, name: "Valtteri Bottas", code: "BOT", team: "Cadillac F1", points: 0, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/V/VALBOT01_Valtteri_Bottas/valbot01.png", website: "https://www.valtteribottas.com" },
+            { pos: 22, name: "Lance Stroll", code: "STR", team: "Aston Martin", points: 0, img: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANSTR01_Lance_Stroll/lanstr01.png", website: "https://www.lancestroll.com" }
+        ];
+
+        // Full dataset for 24 Races
+        const scheduleData = [
+            { round: 1, name: "Australian Grand Prix", winner: "George Russell", status: "completed", date: "Mar 8, 2026" },
+            { round: 2, name: "Chinese Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "Mar 15, 2026" },
+            { round: 3, name: "Japanese Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "Mar 29, 2026" },
+            { round: 4, name: "Bahrain Grand Prix", winner: "Cancelled", status: "completed", date: "Apr 12, 2026" },
+            { round: 5, name: "Saudi Arabian Grand Prix", winner: "Cancelled", status: "completed", date: "Apr 19, 2026" },
+            { round: 6, name: "Miami Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "May 3, 2026" },
+            { round: 7, name: "Canadian Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "May 24, 2026" },
+            { round: 8, name: "Monaco Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "Jun 7, 2026" },
+            { round: 9, name: "Barcelona-Catalunya GP", winner: "Lewis Hamilton", status: "completed", date: "Jun 14, 2026" },
+            { round: 10, name: "Austrian Grand Prix", winner: "George Russell", status: "completed", date: "Jun 28, 2026" },
+            { round: 11, name: "British Grand Prix", winner: "Charles Leclerc", status: "completed", date: "Jul 5, 2026" },
+            { round: 12, name: "Belgian Grand Prix", winner: "Andrea Kimi Antonelli", status: "completed", date: "Jul 19, 2026" },
+            { round: 13, name: "Hungarian Grand Prix", winner: "Lando Norris", status: "completed", date: "Jul 26, 2026" },
+            { round: 14, name: "Dutch Grand Prix", winner: "Upcoming", status: "upcoming", date: "Aug 23, 2026" },
+            { round: 15, name: "Italian Grand Prix", winner: "Upcoming", status: "upcoming", date: "Sep 6, 2026" },
+            { round: 16, name: "Spanish GP (Madrid)", winner: "Upcoming", status: "upcoming", date: "Sep 13, 2026" },
+            { round: 17, name: "Azerbaijan Grand Prix", winner: "Upcoming", status: "upcoming", date: "Sep 26, 2026" },
+            { round: 18, name: "Singapore Grand Prix", winner: "Upcoming", status: "upcoming", date: "Oct 11, 2026" },
+            { round: 19, name: "United States Grand Prix", winner: "Upcoming", status: "upcoming", date: "Oct 25, 2026" },
+            { round: 20, name: "Mexico City Grand Prix", winner: "Upcoming", status: "upcoming", date: "Nov 1, 2026" },
+            { round: 21, name: "São Paulo Grand Prix", winner: "Upcoming", status: "upcoming", date: "Nov 8, 2026" },
+            { round: 22, name: "Las Vegas Grand Prix", winner: "Upcoming", status: "upcoming", date: "Nov 21, 2026" },
+            { round: 23, name: "Qatar Grand Prix", winner: "Upcoming", status: "upcoming", date: "Nov 29, 2026" },
+            { round: 24, name: "Abu Dhabi Grand Prix", winner: "Upcoming", status: "upcoming", date: "Dec 6, 2026" }
+        ];
+
+        // Populate Standings Table
+        const standingsTbody = document.getElementById('standingsTable');
+        standingsData.forEach(d => {
+            const row = document.createElement('tr');
+            row.className = 'data-row';
+            row.innerHTML = `
+                <td class="pos">${d.pos}</td>
+                <td>
+                    <div class="driver-cell">
+                        <img src="${d.img}" alt="${d.name}" class="driver-img" onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png'">
+                        <div>
+                            <strong>${d.name}</strong> <small>(${d.code})</small>
+                            <span class="team-tag">${d.team}</span>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>${d.points}</strong></td>
+                <td><a href="${d.website}" target="_blank" class="web-link">Website ↗</a></td>
+            `;
+            standingsTbody.appendChild(row);
+        });
+
+        // Populate Schedule Table
+        const scheduleTbody = document.getElementById('scheduleTable');
+        scheduleData.forEach(s => {
+            const row = document.createElement('tr');
+            row.className = 'data-row';
+            const badgeClass = s.status === 'completed' ? 'status-completed' : 'status-upcoming';
+            row.innerHTML = `
+                <td class="pos">${s.round}</td>
+                <td><strong>${s.name}</strong></td>
+                <td>
+                    <span class="status-badge ${badgeClass}">${s.winner}</span>
+                </td>
+                <td>${s.date}</td>
+            `;
+            scheduleTbody.appendChild(row);
+        });
+
+        // Search Filter Logic
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.classList.toggle('hidden', !row.textContent.toLowerCase().includes(query));
+            });
+        });
+
+        // Tab View Switching Logic
+        function switchView(view, evt) {
+            const standings = document.getElementById('standingsCard');
+            const schedule = document.getElementById('scheduleCard');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (view === 'standings') {
+                standings.classList.remove('hidden');
+                schedule.classList.add('hidden');
+            } else if (view === 'schedule') {
+                standings.classList.add('hidden');
+                schedule.classList.remove('hidden');
+            } else {
+                standings.classList.remove('hidden');
+                schedule.classList.remove('hidden');
+            }
+            if (evt) evt.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
